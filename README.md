@@ -4,12 +4,12 @@ Multi-model chat client with cloud API and local Ollama support. Terminal-based 
 
 ## Features
 
-- **Cloud API** — Access GPT 5.5, Claude Opus 4.7, Gemini 3.5 Flash, and 30+ models via sboomtools
+- **Cloud API** — Access GPT 5.5, Claude Opus 4.7, Gemini 3.5 Flash, and 30+ models via the cloud API
 - **Pro access** — The `is_vip=1` flag is sent automatically, unlocking all models
 - **Local Ollama** — Fall back to a local Ollama instance on your network
 - **Streaming responses** — Real-time token-by-token output
 - **Conversation context** — Full multi-turn conversation tracking via `chat_id`
-- **OpenAI-compatible proxy** — Translates OpenAI API format to sboomtools, enabling integration with OpenCode, Cursor, etc.
+- **OpenAI-compatible proxy** — Translates OpenAI API format to the cloud backend, enabling integration with OpenCode, Cursor, etc.
 - **Tool calling** — Supports function calling via `<tool_call>` XML tags parsed from model responses
 
 ## Quick Start
@@ -82,7 +82,7 @@ Set config variables in `config.py`:
 
 | Variable | Default | Description |
 |---|---|---|
-| `BASE_URL` | `https://chatopenai.sboomtools.net` | Cloud API base URL |
+| `BASE_URL` | *(set in config.py)* | Cloud API base URL |
 | `IS_VIP` | `"1"` | Pro access flag |
 | `OLLAMA_HOST` | `192.168.100.125` | Ollama server address |
 | `OLLAMA_PORT` | `11434` | Ollama server port |
