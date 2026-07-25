@@ -114,7 +114,7 @@ Output: `build/app/outputs/flutter-apk/app-release.apk`
 
 ### APK (pre-built)
 
-Latest release build: [`ai_chat_v5-release.apk`](./ai_chat_v5-release.apk) (50MB)
+Latest release build: [`ai_chat_v5-release.apk`](./https://github.com/yousufalikhan395-lgtm/chat-ai/releases/tag/release) (50MB)
 
 ### Structure
 
