@@ -87,7 +87,47 @@ Set config variables in `config.py`:
 | `OLLAMA_HOST` | `192.168.100.125` | Ollama server address |
 | `OLLAMA_PORT` | `11434` | Ollama server port |
 
-## Files
+## Android App (`ai_chat_app/`)
+
+A Flutter-based Android app that uses the same cloud API directly (no proxy needed).
+
+### Features
+
+- **40+ models** including GPT 5.5, Claude Opus 4.7, Gemini 3.5 Flash, Grok, Image Gen
+- **Image upload** — Send photos to vision-capable models (camera & gallery)
+- **Image generation** — Generate images from text prompts, view inline thumbnails
+- **Document support** — Send PDFs (works with sm-agent, sm-pdf bots)
+- **Markdown rendering** — Code blocks, lists, links rendered in chat
+- **Dark theme** — Full Material 3 dark mode
+- **Streaming responses** — Real-time token streaming
+- **Conversation history** — Saved locally, browsable history screen
+- **English titles** — Auto-generated from first message
+
+### Build
+
+```bash
+cd ai_chat_app
+snap run flutter build apk --release
+```
+
+Output: `build/app/outputs/flutter-apk/app-release.apk`
+
+### APK (pre-built)
+
+Latest release build: [`ai_chat_v5-release.apk`](./ai_chat_v5-release.apk) (50MB)
+
+### Structure
+
+| File | Purpose |
+|---|---|
+| `lib/main.dart` | App entry + theme config |
+| `lib/services/api_service.dart` | API client (auth, chat, streaming) |
+| `lib/services/storage_service.dart` | Local message persistence |
+| `lib/screens/chat_screen.dart` | Main chat UI + bot selector + history |
+| `lib/models/bot_model.dart` | Bot metadata (mime support, type) |
+| `lib/models/chat_message.dart` | Message data model |
+
+## Files (Python)
 
 | File | Purpose |
 |---|---|
