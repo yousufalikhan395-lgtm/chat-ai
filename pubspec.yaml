@@ -1,0 +1,24 @@
+name: ai_chat_app
+description: AI Chat Client - Multi-model chat
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+  shared_preferences: ^2.2.0
+  image_picker: ^1.0.0
+  uuid: ^4.0.0
+  crypto: ^3.0.0
+  flutter_markdown: ^0.7.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

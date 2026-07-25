@@ -1,0 +1,2 @@
+-keep class com.chat.app.** { *; }
+-keep class com.example.cca.** { *; }
