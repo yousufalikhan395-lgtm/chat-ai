@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../models/chat_message.dart';
 import '../models/bot_model.dart';
 import '../services/api_service.dart';
+import '../services/image_download_service.dart';
 import '../services/storage_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -77,6 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
         model: _currentBot!.model,
         service: _currentBot!.service,
         botId: _currentBot!.botId,
+        isImageBot: _currentBot!.isImageBot,
         imageFile: imageFile,
       );
       final buf = StringBuffer();
@@ -234,9 +236,19 @@ class _MessageBubble extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => Scaffold(
+        builder: (viewerCtx) => Scaffold(
           backgroundColor: Colors.black,
-          appBar: AppBar(backgroundColor: Colors.transparent, iconTheme: const IconThemeData(color: Colors.white)),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            iconTheme: const IconThemeData(color: Colors.white),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.download, color: Colors.white),
+                tooltip: 'Download',
+                onPressed: () => ImageDownloadService.download(viewerCtx, url),
+              ),
+            ],
+          ),
           body: Center(
             child: InteractiveViewer(
               minScale: 0.5,
@@ -298,18 +310,38 @@ class _MessageBubble extends StatelessWidget {
                   final url = uri.toString();
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: GestureDetector(
-                      onTap: () => _showImage(context, url),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(url, height: 200, width: double.infinity, fit: BoxFit.contain,
-                          loadingBuilder: (_, child, p) {
-                            if (p == null) return child;
-                            return Container(height: 200, color: isDark ? Colors.grey[850] : Colors.grey[300], child: const Center(child: CircularProgressIndicator(strokeWidth: 2)));
-                          },
-                          errorBuilder: (_, __, ___) => Container(height: 200, color: isDark ? Colors.grey[850] : Colors.grey[300], child: const Center(child: Icon(Icons.broken_image))),
+                    child: Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showImage(context, url),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(url, height: 200, width: double.infinity, fit: BoxFit.contain,
+                              loadingBuilder: (_, child, p) {
+                                if (p == null) return child;
+                                return Container(height: 200, color: isDark ? Colors.grey[850] : Colors.grey[300], child: const Center(child: CircularProgressIndicator(strokeWidth: 2)));
+                              },
+                              errorBuilder: (_, __, ___) => Container(height: 200, color: isDark ? Colors.grey[850] : Colors.grey[300], child: const Center(child: Icon(Icons.broken_image))),
+                            ),
+                          ),
                         ),
-                      ),
+                        Positioned(
+                          right: 4,
+                          bottom: 4,
+                          child: Material(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(20),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () => ImageDownloadService.download(context, url),
+                              child: const Padding(
+                                padding: EdgeInsets.all(8),
+                                child: Icon(Icons.download, size: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },

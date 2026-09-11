@@ -63,6 +63,7 @@ class ApiService {
     required String model,
     required String service,
     required String botId,
+    bool isImageBot = false,
     String? chatId,
     File? imageFile,
   }) async* {
@@ -74,7 +75,7 @@ class ApiService {
       ..fields['model'] = model
       ..fields['service'] = service
       ..fields['signature'] = _sign(message)
-      ..fields['stream'] = 'true'
+      ..fields['stream'] = isImageBot ? 'false' : 'true'
       ..fields['platform'] = platform
       ..fields['version_app'] = versionApp
       ..fields['is_vip'] = isVip
@@ -100,10 +101,10 @@ class ApiService {
         final root = jsonDecode(body) as Map?;
         final data = root?['data'] as Map?;
         if (data != null && data['content'] != null) {
-          final content = data['content'].toString();
-          if (content.isNotEmpty) {
-            _chatId = (data['created_chat'] as Map?)?['_id'] as String?;
-            yield content;
+          _chatId = (data['created_chat'] as Map?)?['_id'] as String?;
+          final text = _buildJsonContent(data);
+          if (text.isNotEmpty) {
+            yield text;
             return;
           }
         }
@@ -130,6 +131,37 @@ class ApiService {
         }
       } catch (_) {}
     }
+  }
+
+  // Image models return the image URL(s) in data.mixed_content[].url
+  // (and sometimes data.images[]). Preserve upstream order: image first, then text.
+  String _buildJsonContent(Map? data) {
+    if (data == null) return '';
+    final content = data['content']?.toString() ?? '';
+    final builder = StringBuffer();
+    final mixed = data['mixed_content'];
+    if (mixed is List) {
+      for (final item in mixed) {
+        if (item is Map) {
+          final url = item['url']?.toString();
+          final text = item['text']?.toString();
+          if (url != null && url.isNotEmpty) {
+            builder.write('\n$url\n');
+          } else if (text != null && text.isNotEmpty) {
+            builder.write(text);
+          }
+        }
+      }
+    }
+    final out = builder.toString().split('\n').where((l) => l.isNotEmpty).join('\n');
+    if (out.isEmpty) {
+      final images = data['images'];
+      if (images is List) {
+        return images.map((u) => u.toString()).where((u) => u.isNotEmpty).join('\n');
+      }
+      return content;
+    }
+    return out;
   }
 
   Future<List<Map<String, dynamic>>> getConversations({int page = 1}) async {

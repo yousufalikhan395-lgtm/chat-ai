@@ -7,13 +7,16 @@ class BotModel {
   final String type;
   final String mimeSupport;
   final int maxFiles;
+  final bool stream;
 
   bool get supportsImage => mimeSupport.isNotEmpty;
+  bool get isImageBot => type == 'chat-image' || type == 'gen-image' || !stream;
 
   BotModel({
     required this.botId, required this.name,
     required this.service, required this.model,
     this.isVip = false, this.type = 'chat', this.mimeSupport = '', this.maxFiles = 0,
+    this.stream = true,
   });
 
   factory BotModel.fromJson(Map<String, dynamic> j) => BotModel(
@@ -25,5 +28,6 @@ class BotModel {
     type: j['type'] ?? 'chat',
     mimeSupport: j['mime_support'] ?? '',
     maxFiles: j['max_files'] ?? 1,
+    stream: (j['stream'] ?? true) is bool ? j['stream'] as bool : j['stream'] == 'true',
   );
 }
