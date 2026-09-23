@@ -16,6 +16,16 @@ class ApiService {
   static const String versionApp = '10.5.3';
   static const String isVip = '1';
 
+  // Upstream WAF blocks non-browser clients (Dart/httpx default UAs get
+  // 400/403 on every request). Send browser-like headers on ALL requests,
+  // mirroring the web fix.
+  static const Map<String, String> upstreamHeaders = {
+    'User-Agent':
+        'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+  };
+
   String? _token;
   String? _chatId;
 
@@ -30,14 +40,24 @@ class ApiService {
     return digest.toString();
   }
 
-  Map<String, String> get _headers => {'Authorization': 'Bearer $_token'};
+  Map<String, String> get _headers => {
+    ...upstreamHeaders,
+    if (_token != null) 'Authorization': 'Bearer $_token',
+  };
+
+  String _safeSnippet(String body, [int max = 300]) =>
+      body.length <= max ? body : body.substring(0, max);
 
   Future<void> auth() async {
     final uuid = const Uuid().v4();
     final r = await http.post(
       Uri.parse('$baseUrl/api/user/identifier'),
-      body: {'uuid': uuid, 'platform': platform},
+      headers: {...upstreamHeaders, 'Content-Type': 'application/json'},
+      body: jsonEncode({'uuid': uuid, 'platform': platform}),
     );
+    if (r.statusCode == 403 || r.statusCode == 400) {
+      throw Exception('Auth blocked (${r.statusCode}): ${_safeSnippet(r.body)}');
+    }
     final data = jsonDecode(r.body);
     if (data['code'] != 200) throw Exception(data['message'] ?? 'Auth failed');
     _token = data['data']['token'];
@@ -48,6 +68,9 @@ class ApiService {
       Uri.parse('$baseUrl/api/$verApi/general/services_v2'),
       headers: _headers,
     );
+    if (r.statusCode == 403 || r.statusCode == 400) {
+      throw Exception('Fetch blocked (${r.statusCode}): ${_safeSnippet(r.body)}');
+    }
     final data = jsonDecode(r.body);
     if (data['code'] != 200) throw Exception(data['message'] ?? 'Fetch failed');
     final List<Map<String, dynamic>> bots = [];
@@ -84,13 +107,21 @@ class ApiService {
     if (chatId != null) request.fields['chat_id'] = chatId;
 
     if (imageFile != null) {
-      request.files.add(await http.MultipartFile.fromPath('file', imageFile.path, contentType: MediaType.parse('multipart/form-data')));
+      final ext = imageFile.path.split('.').last.toLowerCase();
+      final mime = switch (ext) {
+        'png' => 'image/png',
+        'webp' => 'image/webp',
+        'gif' => 'image/gif',
+        _ => 'image/jpeg',
+      };
+      request.files.add(
+          await http.MultipartFile.fromPath('file', imageFile.path, contentType: MediaType.parse(mime)));
     }
 
     final streamed = await request.send();
     if (streamed.statusCode != 200) {
       final body = await streamed.stream.bytesToString();
-      throw Exception('API ${streamed.statusCode}: ${body.substring(0, 200)}');
+      throw Exception('API ${streamed.statusCode}: ${_safeSnippet(body, 300)}');
     }
 
     final body = await streamed.stream.bytesToString();
