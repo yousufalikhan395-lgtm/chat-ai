@@ -10,7 +10,7 @@ class ChatApp extends StatelessWidget {
   const ChatApp({super.key});
   @override Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI Chat',
+      title: 'Donkey Chat',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       darkTheme: buildAppTheme(),

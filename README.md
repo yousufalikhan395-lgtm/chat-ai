@@ -1,4 +1,8 @@
-# AI Chat Client
+# Donkey Chat
+
+<p align="center">
+  <img src="donkey-chat.png" alt="Donkey Chat icon" width="160">
+</p>
 
 Multi-model chat client with cloud API and local Ollama support. Terminal-based with an OpenAI-compatible proxy for integration with tools like OpenCode.
 

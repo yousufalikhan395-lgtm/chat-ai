@@ -229,7 +229,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   SharePlus.instance
-                      .share(ShareParams(text: msg.content, title: 'AI Chat message'));
+                      .share(ShareParams(text: msg.content, title: 'Donkey Chat message'));
                 },
               ),
             if (hasText && !_streaming)
@@ -343,7 +343,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (m.imagePath != null) sb.writeln('*(image attached)*');
       sb.writeln();
     }
-    SharePlus.instance.share(ShareParams(text: sb.toString().trim(), title: 'AI Chat export'));
+    SharePlus.instance.share(ShareParams(text: sb.toString().trim(), title: 'Donkey Chat export'));
   }
 
   void _openGallery() {
@@ -361,7 +361,7 @@ class _ChatScreenState extends State<ChatScreen> {
         titleSpacing: 20,
         title: Text.rich(
           TextSpan(
-            text: _currentBot?.name ?? 'AI Chat',
+            text: _currentBot?.name ?? 'Donkey Chat',
             style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 17,

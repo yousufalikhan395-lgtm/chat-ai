@@ -1,5 +1,5 @@
 name: ai_chat_app
-description: AI Chat Client - Multi-model chat
+description: Donkey Chat - Multi-model chat client
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -21,8 +21,17 @@ dependencies:
   path_provider: ^2.1.6
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "donkey-chat.png"
+  adaptive_icon_foreground: "donkey-chat.png"
+  adaptive_icon_background: "#9BCAAA"
+  remove_alpha_channel: false
 
 flutter:
   uses-material-design: true
