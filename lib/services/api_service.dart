@@ -28,6 +28,11 @@ class ApiService {
 
   String? _token;
   String? _chatId;
+  bool _cancelFlag = false;
+
+  /// Abort the currently streaming sendMessage; the async* loop checks this
+  /// per line and closes the stream (caller's `await for` completes).
+  void stopStreaming() => _cancelFlag = true;
 
   String _sign(String msg) {
     final content = '$salt&$msg&$package';
@@ -90,6 +95,7 @@ class ApiService {
     String? chatId,
     File? imageFile,
   }) async* {
+    _cancelFlag = false;
     chatId = chatId ?? _chatId;
     final uri = Uri.parse('$baseUrl/api/$verApi/general/completionFast');
     final request = http.MultipartRequest('POST', uri)
@@ -124,41 +130,77 @@ class ApiService {
       throw Exception('API ${streamed.statusCode}: ${_safeSnippet(body, 300)}');
     }
 
-    final body = await streamed.stream.bytesToString();
+    // Read line-by-line instead of buffering the whole body: enables real
+    // token-by-token rendering and mid-stream cancellation via stopStreaming().
+    // Single pass only — the underlying stream is single-subscription.
+    //
+    // Mode detection: a body starting with '{' is ambiguous — either a single
+    // JSON response (image gen) or an SSE stream whose first line is a raw
+    // {"_id":...} handshake. Stay undecided until we see a 'data:' line
+    // (→ SSE, replay buffered lines) or EOF (→ JSON).
+    final lines =
+        streamed.stream.transform(utf8.decoder).transform(const LineSplitter());
+    final pending = <String>[];
+    bool sse = false;
+    bool first = true;
 
-    // Try single JSON response (image generation models)
-    if (body.isNotEmpty && body[0] == '{') {
+    sseLoop:
+    await for (final line in lines) {
+      if (_cancelFlag) return;
+
+      List<String> batch;
+      if (!sse) {
+        if (pending.isEmpty && line.trim().isEmpty) continue;
+        if (pending.isEmpty && !line.trimLeft().startsWith('{')) {
+          sse = true;
+          batch = [line];
+        } else {
+          pending.add(line);
+          if (line.startsWith('data:') || line.startsWith('event:')) {
+            // Undecided stream turned out to be SSE — replay what we buffered.
+            sse = true;
+            batch = List<String>.of(pending);
+            pending.clear();
+          } else {
+            continue; // still buffering (possibly pretty-printed JSON)
+          }
+        }
+      } else {
+        batch = [line];
+      }
+
+      for (final l in batch) {
+        if (_cancelFlag) return;
+        if (l.isEmpty) continue;
+        String raw = l;
+        if (raw.startsWith('data: ')) raw = raw.substring(6);
+        if (raw == '[DONE]') break sseLoop;
+        try {
+          final j = jsonDecode(raw);
+          if (first && j.containsKey('_id') && !j.containsKey('text')) {
+            _chatId = j['_id'];
+            first = false;
+            continue;
+          }
+          first = false;
+          if (j['text'] != null && j['text'].toString().isNotEmpty) {
+            yield j['text'];
+          }
+        } catch (_) {}
+      }
+    }
+
+    // EOF while still undecided → the whole body was JSON (image generation).
+    if (!sse && pending.isNotEmpty) {
       try {
-        final root = jsonDecode(body) as Map?;
+        final root = jsonDecode(pending.join('\n')) as Map?;
         final data = root?['data'] as Map?;
         if (data != null && data['content'] != null) {
           _chatId = (data['created_chat'] as Map?)?['_id'] as String?;
           final text = _buildJsonContent(data);
           if (text.isNotEmpty) {
             yield text;
-            return;
           }
-        }
-      } catch (_) {}
-    }
-
-    // SSE streaming (text models)
-    bool first = true;
-    for (final line in body.split('\n')) {
-      if (line.isEmpty) continue;
-      String raw = line;
-      if (raw.startsWith('data: ')) raw = raw.substring(6);
-      if (raw == '[DONE]') break;
-      try {
-        final j = jsonDecode(raw);
-        if (first && j.containsKey('_id') && !j.containsKey('text')) {
-          _chatId = j['_id'];
-          first = false;
-          continue;
-        }
-        first = false;
-        if (j['text'] != null && j['text'].toString().isNotEmpty) {
-          yield j['text'];
         }
       } catch (_) {}
     }

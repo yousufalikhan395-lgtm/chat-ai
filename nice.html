@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101711">
+  <meta name="description" content="Still — find a little more meaning in the everyday.">
+  <title>Still — Make room for what matters</title>
+  <style>
+    :root {
+      --bg: #101711;
+      --surface: #19221b;
+      --text: #f3f0e7;
+      --muted: #adb5a6;
+      --accent: #d5ed9c;
+      --line: rgba(243,240,231,.14);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+    ::selection { background: var(--accent); color: var(--bg); }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+    .container { width: min(1180px, calc(100% - 48px)); margin: auto; }
+    .skip {
+      position: absolute; top: -80px; left: 20px; z-index: 20;
+      padding: 12px 18px; background: var(--accent); color: var(--bg);
+    }
+    .skip:focus { top: 12px; }
+
+    /* Navigation */
+    header { border-bottom: 1px solid var(--line); }
+    nav {
+      min-height: 92px; display: flex;
+      align-items: center; justify-content: space-between; gap: 24px;
+    }
+    .logo { font-size: 30px; font-weight: 650; letter-spacing: -2px; }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { font-size: 14px; color: var(--muted); }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .nav-cta {
+      padding: 12px 20px; border: 1px solid var(--line);
+      border-radius: 100px; color: var(--text);
+    }
+
+    /* Hero */
+    .hero {
+      display: grid; grid-template-columns: 1.1fr 1fr;
+      align-items: center; gap: 64px; padding: 84px 0 76px;
+    }
+    .eyebrow {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--accent); font-size: 11px;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 18px #d5ed9c66;
+    }
+    h1 {
+      font-size: clamp(56px, 6.7vw, 94px); line-height: 1;
+      letter-spacing: -5px; font-weight: 500; margin: 28px 0;
+    }
+    h1 em, h2 em {
+      font-family: Georgia, serif; font-weight: 400;
+      color: var(--accent);
+    }
+    .intro {
+      max-width: 380px; color: var(--muted);
+      font-size: 17px; line-height: 1.8;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 34px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 24px; padding: 17px 23px; border: 0; border-radius: 100px;
+      background: var(--accent); color: var(--bg);
+      font-size: 14px; font-weight: 650; transition: transform .2s, background .2s;
+    }
+    .button:hover { transform: translateY(-3px); background: #e6f8bf; }
+    .button.secondary { background: transparent; color: var(--text); border: 1px solid var(--line); }
+    .small-note { margin-top: 26px; font-size: 12px; color: var(--muted); }
+
+    /* Artwork built entirely with CSS */
+    .art {
+      position: relative; isolation: isolate; overflow: hidden;
+      height: 540px; border-radius: 180px 180px 24px 24px;
+      background:
+        radial-gradient(ellipse at 50% 15%, #839275 0%, transparent 50%),
+        linear-gradient(160deg, #384e3b, #1d3329 60%, #10251d);
+      border: 1px solid #ffffff1a;
+    }
+    .art::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, #ffffff03 0 1px, transparent 1px 4px);
+    }
+    .sun {
+      position: absolute; width: 190px; height: 190px; border-radius: 50%;
+      top: 70px; left: calc(50% - 95px);
+      background: linear-gradient(140deg, #f2efca, #cbd29a);
+      box-shadow: 0 0 80px #edf1b622;
+      animation: float 9s ease-in-out infinite;
+    }
+    .hill { position: absolute; width: 150%; height: 360px; border-radius: 50%; }
+    .hill.one {
+      background: #3a5943; bottom: -120px; left: -45%;
+      transform: rotate(24deg);
+    }
+    .hill.two {
+      background: #243f31; bottom: -130px; right: -60%;
+      transform: rotate(-30deg);
+    }
+    .hill.three {
+      background: #142e24; bottom: -255px; left: -15%;
+    }
+    .art-label {
+      position: absolute; z-index: 2; top: 30px; left: 50%;
+      transform: translateX(-50%); white-space: nowrap;
+      font-size: 10px; letter-spacing: 3px; color: #f3f0e7b3;
+    }
+    .art-caption {
+      position: absolute; z-index: 2; bottom: 28px;
+      left: 28px; right: 28px; display: flex;
+      justify-content: space-between; align-items: end;
+    }
+    .art-caption p { margin: 0; font-family: Georgia, serif; font-size: 26px; line-height: 1.2; }
+    .art-caption span { font-size: 11px; color: #c5d0bb; }
+
+    /* Content */
+    .ticker {
+      padding: 23px 0; border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .ticker-inner {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      gap: 20px; color: var(--muted); font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .ticker b { color: var(--accent); font-weight: 400; }
+    .section { padding: 90px 0; }
+    .section-heading {
+      display: flex; justify-content: space-between;
+      align-items: end; gap: 28px; margin-bottom: 36px;
+    }
+    h2 {
+      font-size: clamp(34px, 4vw, 52px); font-weight: 450;
+      letter-spacing: -2px; line-height: 1.1; margin: 16px 0 0;
+    }
+    .section-heading > p {
+      max-width: 285px; color: var(--muted);
+      font-size: 14px; line-height: 1.8; margin: 0;
+    }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+      padding: 30px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); transition: transform .25s, border-color .25s;
+    }
+    .card:hover { transform: translateY(-6px); border-color: #d5ed9c66; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; }
+    .icon {
+      display: grid; place-items: center; width: 48px; height: 48px;
+      border-radius: 50%; background: #d5ed9c12; color: var(--accent); font-size: 25px;
+    }
+    .number { font-size: 11px; color: var(--muted); }
+    h3 { font-size: 22px; font-weight: 500; margin: 32px 0 12px; letter-spacing: -.5px; }
+    .card p { font-size: 14px; line-height: 1.8; color: var(--muted); margin: 0; }
+    .reflection {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+      padding: 48px; background: var(--accent); color: var(--bg);
+      border-radius: var(--radius); align-items: center;
+    }
+    .reflection .eyebrow { color: #435336; }
+    .reflection h2 { margin-bottom: 20px; }
+    .reflection p { color: #435336; line-height: 1.7; font-size: 14px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    textarea {
+      display: block; width: 100%; min-height: 130px; resize: vertical;
+      padding: 18px; border: 1px solid #10171130; border-radius: 16px;
+      background: #ffffff50; color: var(--bg); line-height: 1.6;
+    }
+    textarea::placeholder { color: #506043; }
+    .reflection :focus-visible { outline-color: var(--bg); }
+    .reflection .button { background: var(--bg); color: var(--text); margin-top: 16px; }
+    .reflection .button:hover { background: #29362a; }
+    .status { min-height: 22px; margin: 12px 0 0; font-size: 12px !important; }
+    footer {
+      padding: 30px 0; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; gap: 20px; align-items: center;
+    }
+    footer p { color: var(--muted); font-size: 12px; }
+    @keyframes float { 50% { transform: translateY(-14px); } }
+    @media (max-width: 900px) {
+      .hero { gap: 30px; }
+      h1 { letter-spacing: -3px; }
+      .art { height: 470px; }
+      .card { padding: 24px; }
+      .reflection { gap: 30px; padding: 32px; }
+    }
+    @media (max-width: 680px) {
+      .container { width: calc(100% - 36px); }
+      nav { min-height: 76px; }
+      .nav-links { gap: 16px; }
+      .nav-links .nav-cta { padding: 10px 14px; }
+      .hero { grid-template-columns: 1fr; padding: 50px 0; gap: 40px; }
+      h1 { font-size: 64px; }
+      .art { height: 420px; border-radius: 150px 150px 24px 24px; }
+      .ticker-inner { justify-content: center; font-size: 10px; }
+      .section { padding: 60px 0; }
+      .section-heading { display: block; }
+      .section-heading > p { margin-top: 20px; }
+      .cards, .reflection { grid-template-columns: 1fr; }
+      .reflection { padding: 28px; }
+      footer { align-items: start; }
+      footer p { max-width: 180px; text-align: right; line-height: 1.6; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header>
+    <nav class="container" aria-label="Main navigation">
+      <a class="logo" href="#" aria-label="Still home">still<span>.</span></a>
+      <div class="nav-links">
+        <a href="#approach">Our approach</a>
+        <a class="nav-cta" href="#reflect">Take a moment ↗</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero container" aria-labelledby="hero-title">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> A little less noise. A little more life.</div>
+        <h1 id="hero-title">Make room<br>for what<br><em>matters.</em></h1>
+        <p class="intro">
+          You don’t need to have it all figured out.
+          Start with a quiet moment, a small intention,
+          and the things that make you feel alive.
+        </p>
+        <div class="actions">
+          <a class="button" href="#reflect">Find your moment <span aria-hidden="true">↗</span></a>
+          <a class="button secondary" href="#approach">Explore the idea</a>
+        </div>
+        <p class="small-note">No perfect answers. Just a place to begin.</p>
+      </div>
+
+      <div class="art" role="img" aria-label="An abstract pale sun rising over layered green hills">
+        <div class="art-label" aria-hidden="true">THE ART OF BEING HERE</div>
+        <div class="sun"></div>
+        <div class="hill one"></div>
+        <div class="hill two"></div>
+        <div class="hill three"></div>
+        <div class="art-caption" aria-hidden="true">
+          <p>Slow down.<br>Look closer.</p>
+          <span>YOUR EVERYDAY, REIMAGINED</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker">
+      <div class="ticker-inner container">
+        <span>Less scrolling <b>✳</b> More living</span>
+        <span>Small steps <b>✳</b> Real meaning</span>
+        <span>Be present <b>✳</b> Stay curious</span>
+      </div>
+    </div>
+
+    <section class="section container" id="approach" aria-labelledby="approach-title">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">A simpler way forward</div>
+          <h2 id="approach-title">A meaningful life.<br><em>Built in little moments.</em></h2>
+        </div>
+        <p>Not another thing to achieve. A different way to notice what’s already here.</p>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">◎</span>
+            <span class="number">01 / NOTICE</span>
+          </div>
+          <h3>Come back to now.</h3>
+          <p>The warmth of your coffee. A familiar voice. Light across the room. Ordinary things, fully noticed.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">✳</span>
+            <span class="number">02 / CONNECT</span>
+          </div>
+          <h3>Care about something.</h3>
+          <p>A person, a place, an idea. Meaning grows when you give your attention to something beyond yourself.</p>
+        </article>
+        <article class="card">
+          <div class="card-top">
+            <span class="icon" aria-hidden="true">↗</span>
+            <span class="number">03 / BEGIN</span>
+          </div>
+          <h3>Take one small step.</h3>
+          <p>Make the call. Create something imperfect. Go outside. A life you love is built, not suddenly found.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="container" id="reflect" aria-labelledby="reflect-title" style="padding-bottom: 80px">
+      <div class="reflection">
+        <div>
+          <div class="eyebrow">Your daily pause</div>
+          <h2 id="reflect-title">What made you feel<br>alive today?</h2>
+          <p>It doesn’t have to be extraordinary. Write down one little thing you want to remember.</p>
+        </div>
+        <form id="reflection-form">
+          <label for="thought">One moment worth keeping</label>
+          <textarea id="thought" maxlength="1200" required
+            placeholder="Today, I noticed…" aria-describedby="save-status"></textarea>
+          <button class="button" type="submit">Keep this moment <span aria-hidden="true">↗</span></button>
+          <p class="status" id="save-status" role="status">Saved only in this browser. Nothing is sent to a server.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <a class="logo" href="#" aria-label="Still home">still<span>.</span></a>
+    <p>Less noise. More meaning.<br>Made for the beautifully ordinary.</p>
+  </footer>
+
+  <script>
+    const form = document.querySelector("#reflection-form");
+    const thought = document.querySelector("#thought");
+    const status = document.querySelector("#save-status");
+    const storageKey = "still-reflection";
+
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        thought.value = saved;
+        status.textContent = "Your last moment is here, saved in this browser.";
+      }
+    } catch {
+      status.textContent = "Browser storage is unavailable. You can still write here.";
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = thought.value.trim();
+
+      if (!value) {
+        status.textContent = "Write a little something before saving.";
+        thought.focus();
+        return;
+      }
+
+      try {
+        localStorage.setItem(storageKey, value);
+        status.textContent = "Moment saved. Sometimes the little things are the big things.";
+      } catch {
+        status.textContent = "Couldn’t save in this browser. Copy your moment to keep it.";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -17,6 +17,8 @@ dependencies:
   crypto: ^3.0.0
   flutter_markdown: ^0.7.3
   gal: ^2.3.0
+  share_plus: ^13.3.1
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +26,15 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: "assets/fonts/Inter.ttf"
+    - family: InstrumentSerif
+      fonts:
+        - asset: assets/fonts/InstrumentSerif-Regular.ttf
+        - asset: assets/fonts/InstrumentSerif-Italic.ttf
+          style: italic
+    - family: JetBrainsMono
+      fonts:
+        - asset: "assets/fonts/JetBrainsMono.ttf"

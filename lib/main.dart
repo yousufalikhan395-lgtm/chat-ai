@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'services/storage_service.dart';
 import 'screens/chat_screen.dart';
+import 'theme.dart';
 
 void main() => runApp(const ChatApp());
 
@@ -11,16 +12,8 @@ class ChatApp extends StatelessWidget {
     return MaterialApp(
       title: 'AI Chat',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
+      theme: buildAppTheme(),
+      darkTheme: buildAppTheme(),
       themeMode: ThemeMode.dark,
       home: _AppShell(),
     );
